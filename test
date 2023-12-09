@@ -1,0 +1,47 @@
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1182868670645538936/xVaIynBNrk1p2tBV-P0b1yH00cQPuQ75m6xnCRyRBU8hDQYzwexMhDF-VfOKT0LzY6_3"
+
+-- Diamonds, Coins, Fantasy Coins, Tech Coins, Rainbow Coins, Cartoon Coins
+-- Or event Currencies: Clover Coins, Gingerbread, Halloween Candy, Valentine Hearts
+local CURRENCY_NAME = "Cartoon Coins"
+
+local Library = require(game.ReplicatedStorage.Library)
+Library.Load()
+
+local COIN_EMOTE = "<:e:1087199766401794168>"
+
+function SendInfo()
+    if not WEBHOOK_URL or WEBHOOK_URL == "" then print("PLEASE GIVE A WEBHOOK URL TO SEND") return end
+    local saveData = Library.Save.Get()
+    if not saveData then print("Oops! Failed to get save!") return end
+    
+    local currencyLeft = saveData[CURRENCY_NAME]
+    if Library.Shared.IsHardcore then 
+        currencyLeft = saveData["HardcoreCurrency"][CURRENCY_NAME]
+    end
+
+    if currencyLeft == nil then print("Oops! Can't get currency left!") return end    
+    local currencyString = COIN_EMOTE .. " " .. Library.Functions.NumberShorten(currencyLeft) .. " **" .. CURRENCY_NAME .. "**" 
+    local embed = {
+            ["title"] = "Currency Update",
+            ["description"] = "This is a reminder of how much currency left you have",
+            ["fields"] = {
+                {
+                    ["name"] = "Currency Left",
+                    ["value"] = currencyString,
+                }
+            }
+        }
+        
+    (syn and syn.request or http_request or http.request) {
+        Url = WEBHOOK_URL;
+        Method = 'POST';
+        Headers = {
+            ['Content-Type'] = 'application/json';
+        };
+        Body = game:GetService("HttpService"):JSONEncode({embeds = {embed}})
+    }
+
+end
+
+SendInfo()
+-- SET YOUR OWN WAIT TIME! (uncomment line below)-- while wait(600) do SendInfo() end
